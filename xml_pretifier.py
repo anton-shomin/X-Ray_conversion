@@ -19,11 +19,34 @@ def remove_none_cells(dir_path):
                             row.remove(cell)
                 tree.write(file_path)
 
-# clear test case info sheet -- remove everything but test ID and test case purpose
+# remove empty <row> tags
+def remove_empty_rows(dir_path):
+    for root, dirs, files in os.walk(dir_path):
+        for file in files:
+            if file.endswith(".xml"):
+                file_path = os.path.join(root, file)
+                tree = ET.parse(file_path)
+                root_element = tree.getroot()
+                
+                # Assuming each <row> is nested inside a <worksheet>, adjust as per your actual structure
+                for worksheet in root_element.findall('.//worksheet'):
+                    rows_to_remove = []
+
+                    # Collect all empty <row> elements
+                    for row in worksheet.findall('.//row'):
+                        if not row.findall("cell"):
+                            rows_to_remove.append(row)
+                
+                    # Remove collected <row> elements
+                    for row in rows_to_remove:
+                        worksheet.remove(row)
+                
+                # Save the modifications
+                tree.write(file_path)
 
 
 def clear_test_case_info_sheet(dir_path):
-    for root, dirs, files in os.walk(dir_path):
+  for root, dirs, files in os.walk(dir_path):
         for file in files:
             if not file.endswith(".xml"):
                 continue
@@ -58,8 +81,9 @@ def clear_test_case_info_sheet(dir_path):
 
 
 def main(folder):
-    # remove_none_cells(folder)
-    clear_test_case_info_sheet(folder)
+    remove_none_cells(folder)
+    remove_empty_rows(folder)
+    clear_test_case_info_sheet(folder)    
 
 
 if __name__ == '__main__':
