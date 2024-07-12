@@ -2,13 +2,15 @@ import os
 from openpyxl import load_workbook
 from lxml import etree
 
+
 def convert_excel_to_xml(excel_file, xml_file):
     workbook = load_workbook(excel_file)
 
     root = etree.Element('workbook')
 
     for worksheet in workbook.worksheets:
-        worksheet_element = etree.SubElement(root, 'worksheet', name=worksheet.title)
+        worksheet_element = etree.SubElement(
+            root, 'worksheet', name=worksheet.title)
 
         for row in worksheet.iter_rows(values_only=True):
             row_element = etree.SubElement(worksheet_element, 'row')
@@ -17,9 +19,8 @@ def convert_excel_to_xml(excel_file, xml_file):
                 cell_element.text = str(cell)
 
     tree = etree.ElementTree(root)
-    tree.write(xml_file, pretty_print=True, xml_declaration=True, encoding='UTF-8')
-
-
+    tree.write(xml_file, pretty_print=True,
+               xml_declaration=True, encoding='UTF-8')
 
 
 def main(folder_path):
@@ -29,8 +30,3 @@ def main(folder_path):
             xml_file = os.path.splitext(excel_file)[0] + '.xml'
             convert_excel_to_xml(excel_file, xml_file)
             print(f"Converted {filename} to {os.path.basename(xml_file)}")
-
-if __name__ == "__main__":
-    main("/Users/antonshomin/Projects/X-RAY challenge/check-tests")
-
-

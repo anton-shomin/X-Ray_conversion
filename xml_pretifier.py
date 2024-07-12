@@ -48,7 +48,7 @@ def remove_empty_rows(dir_path):
 
 
 def clear_test_case_info_sheet(dir_path):
-    labels = []
+    labels = ""
     for root, dirs, files in os.walk(dir_path):
         for file in files:
             if not file.endswith(".xml"):
@@ -75,7 +75,7 @@ def clear_test_case_info_sheet(dir_path):
                                 keep_row = True
                                 if i+1 < len(cells):  # Ensure next cell exists
                                     # Get text of cell next to test id
-                                    labels.append(cells[i+1].text)
+                                    labels = cells[i+1].text
                                 break
                             elif "test case purpose" in cell_text:
                                 keep_row = True
@@ -89,17 +89,5 @@ def clear_test_case_info_sheet(dir_path):
                         worksheet.remove(row)
 
                 # Save the changes back to the file
-                elif not "checklist".lower() in worksheet.attrib.get('name', '').lower():
-                    labels.append(worksheet.attrib.get('name'))
                 tree.write(file_path)
     return labels
-
-
-def main(folder):
-    remove_none_cells(folder)
-    remove_empty_rows(folder)
-    print(f"labels used {clear_test_case_info_sheet(folder)}")
-
-
-if __name__ == '__main__':
-    main("/Users/antonshomin/Projects/X-RAY challenge/check-tests")

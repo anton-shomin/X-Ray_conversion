@@ -34,34 +34,45 @@ def test_case_tag_creator(dir_path, old_tag, new_tag):
                 tree.write(file_path)
 
 
-def process_XML(file_path, new_file):
+def get_labels(dir_path):
+    pass
+
+
+def process_XML(file_path):
     tree = ET.parse(file_path)
     root = tree.getroot()
-    new_root = ET.Element('testcases')
 
-    rows_to_add = []
-    start_collecting = False
+    # Find or create 'testcases' element
+    testcases = root.find('testcases')
+    if testcases is None:
+        testcases = ET.SubElement(root, 'testcases')
 
-    for row in reversed(root.findall('.//row')):
-        if 'Step #' in ''.join(cell.text for cell in row.findall('cell')):
-            start_collecting = True
-            rows_to_add.append(row)
-        elif start_collecting:
-            cell_texts = ''.join(
-                cell.text for cell in row.findall('cell')).lower()
-
-            # Search for 'Case X' or 'prerequisites' in the row
-            if re.search(r'case\s\d+', cell_texts, re.IGNORECASE) or 'prerequisites' in cell_texts:
+    for worksheet in root.findall('.//worksheet'):
+        rows_to_add = []
+        start_collecting = False
+        for row in reversed(worksheet.findall('.//row')):
+            if 'Step #' in ''.join(cell.text for cell in row.findall('cell')):
+                start_collecting = True
                 rows_to_add.append(row)
-            else:
-                break
+            elif start_collecting:
+                cell_texts = ''.join(
+                    cell.text for cell in row.findall('cell')).lower()
+                if re.search(r'case\s\d+', cell_texts, re.IGNORECASE) or 'prerequisites' in cell_texts:
+                    rows_to_add.append(row)
+                else:
+                    break
 
-    testcase = ET.SubElement(new_root, 'testcase')
-    for row in reversed(rows_to_add):
-        testcase.append(row)
+        # If there are rows to add, create a new testcase element
+        if rows_to_add:
+            # Append to 'testcases', not root
+            testcase = ET.SubElement(testcases, 'testcase')
+            for row in reversed(rows_to_add):
+                testcase.append(row)
+            labels = ET.SubElement(testcase, 'labels')
+            labels.text = worksheet.attrib.get('name', '')
 
-    new_tree = ET.ElementTree(new_root)
-    new_tree.write(new_file)
+    # Write back to the original XML file
+    tree.write(file_path)
 
 
 def restructure_cases(dir_path):
@@ -70,5 +81,4 @@ def restructure_cases(dir_path):
     for root, dirs, files in os.walk(dir_path):
         for file in files:
             if file.endswith(".xml"):
-                process_XML(os.path.join(root, file), f"{
-                            file.name}_restructured.xml")
+                process_XML(file)
