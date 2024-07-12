@@ -7,3 +7,5 @@ Final version/
 check-tests/
 ePPM - Automation/
 .DS_Store/
+.DS_Store
+__pycache__/
