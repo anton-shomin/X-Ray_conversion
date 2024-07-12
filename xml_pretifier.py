@@ -7,6 +7,9 @@ import xml.etree.ElementTree as ET
 
 
 def remove_none_cells(dir_path):
+    """
+    Removes cells with text "None" in all XML files within the specified directory path.
+    """
     for root, dirs, files in os.walk(dir_path):
         for file in files:
             if file.endswith(".xml"):
@@ -23,6 +26,27 @@ def remove_none_cells(dir_path):
 
 
 def remove_empty_rows(dir_path):
+    """
+    Removes empty rows from XML files within the specified directory path.
+
+    Args:
+        dir_path (str): The path to the directory containing the XML files.
+
+    Returns:
+        None
+
+    This function traverses through all XML files in the specified directory path and removes empty rows from each file.
+    An empty row is considered to have no child <cell> elements.
+
+    The function uses the `os.walk` function to recursively iterate through all files in the directory and its subdirectories.
+    For each XML file, it parses the file using the `ET.parse` function from the `xml.etree.ElementTree` module.
+    It then finds all <worksheet> elements in the root element of the XML tree.
+    For each <worksheet> element, it collects all empty <row> elements and stores them in the `rows_to_remove` list.
+    After collecting all empty rows, it removes each row from its parent <worksheet> element.
+    Finally, it saves the modified XML tree back to the file using the `tree.write` function.
+
+    Note: This function assumes that each <row> element is nested inside a <worksheet> element. Adjust the code as per your actual XML structure.
+    """
     for root, dirs, files in os.walk(dir_path):
         for file in files:
             if file.endswith(".xml"):
@@ -48,7 +72,22 @@ def remove_empty_rows(dir_path):
 
 
 def clear_test_case_info_sheet(dir_path):
-    labels = ""
+    """
+    Clears the "Test Case Info" sheet in all XML files within the specified directory path.
+
+    Args:
+        dir_path (str): The path to the directory containing the XML files.
+
+    Returns:
+        str: The text of the cell next to the last found "Test ID" cell, or an empty string if no "Test ID" cells are found.
+
+    This function traverses through all XML files in the specified directory path and clears the "Test Case Info" sheet.
+    It finds all worksheets in each XML file and checks if their name is case-insensitively equal to "Test Case Info".
+    If a worksheet is found, it searches for rows that do not contain the required cell content "Test ID" or "Test Case Purpose".
+    These rows are removed from the worksheet.
+    The text of the cell next to the last found "Test ID" cell is returned.
+    """
+    label = ""
     for root, dirs, files in os.walk(dir_path):
         for file in files:
             if not file.endswith(".xml"):
@@ -75,7 +114,7 @@ def clear_test_case_info_sheet(dir_path):
                                 keep_row = True
                                 if i+1 < len(cells):  # Ensure next cell exists
                                     # Get text of cell next to test id
-                                    labels = cells[i+1].text
+                                    label = cells[i+1].text
                                 break
                             elif "test case purpose" in cell_text:
                                 keep_row = True
@@ -90,4 +129,4 @@ def clear_test_case_info_sheet(dir_path):
 
                 # Save the changes back to the file
                 tree.write(file_path)
-    return labels
+    return label
