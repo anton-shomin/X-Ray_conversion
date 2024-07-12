@@ -3,6 +3,7 @@
 *.xml
 XRAY/
 *.csv
+*.iml
 Final version/
 check-tests/
 ePPM - Automation/

@@ -38,47 +38,56 @@ def get_labels(dir_path):
     pass
 
 
-def process_XML(file_path):
-    tree = ET.parse(file_path)
-    root = tree.getroot()
-
-    # Find or create 'testcases' element
-    testcases = root.find('testcases')
-    if testcases is None:
-        testcases = ET.SubElement(root, 'testcases')
-
-    for worksheet in root.findall('.//worksheet'):
-        rows_to_add = []
-        start_collecting = False
-        for row in reversed(worksheet.findall('.//row')):
-            if 'Step #' in ''.join(cell.text for cell in row.findall('cell')):
-                start_collecting = True
-                rows_to_add.append(row)
-            elif start_collecting:
-                cell_texts = ''.join(
-                    cell.text for cell in row.findall('cell')).lower()
-                if re.search(r'case\s\d+', cell_texts, re.IGNORECASE) or 'prerequisites' in cell_texts:
-                    rows_to_add.append(row)
-                else:
-                    break
-
-        # If there are rows to add, create a new testcase element
-        if rows_to_add:
-            # Append to 'testcases', not root
-            testcase = ET.SubElement(testcases, 'testcase')
-            for row in reversed(rows_to_add):
-                testcase.append(row)
-            labels = ET.SubElement(testcase, 'labels')
-            labels.text = worksheet.attrib.get('name', '')
-
-    # Write back to the original XML file
-    tree.write(file_path)
-
-
 def restructure_cases(dir_path):
-    # locate row with cells Step #, Test Steps, Expected Results, Comments.
-    # from "prerequisites" to "prerequisites" or from
     for root, dirs, files in os.walk(dir_path):
         for file in files:
-            if file.endswith(".xml"):
-                process_XML(file)
+            if file.endswith('.xml'):
+                file_path = os.path.join(root, file)
+
+                tree = ET.parse(file_path)
+                root_element = tree.getroot()
+
+                for worksheet in root_element.findall('.//worksheet'):
+                    name_attrib = worksheet.attrib.get('name', '')
+                    if 'checklist' not in name_attrib.lower() and 'test case info' not in name_attrib.lower():
+                        forward_rows = []
+                        previous_rows = []
+                        step_found = False
+
+                        for row in worksheet.findall('.//row'):
+                            cell_texts = ''.join(cell.text for cell in row.findall('cell') if cell.text)
+                            if re.search(r'Step\s+#', cell_texts, re.IGNORECASE):
+                                if step_found and previous_rows:
+                                    new_root = ET.Element('testcase')
+                                    labels = ET.SubElement(new_root, 'labels')
+                                    label = ET.SubElement(labels, 'label')
+                                    label.text = name_attrib
+                                    for add_row in previous_rows:
+                                        new_root.append(add_row)
+                                    new_dir_path = os.path.join(dir_path, os.path.splitext(file)[0])
+                                    os.makedirs(new_dir_path, exist_ok=True)
+
+                                    file_num = 1
+                                    while os.path.exists(os.path.join(new_dir_path, f"{name_attrib}{file_num}.xml")):
+                                        file_num += 1
+
+                                    new_tree = ET.ElementTree(new_root)
+                                    new_tree.write(os.path.join(new_dir_path, f"{name_attrib}{file_num}.xml"))
+                                previous_rows = forward_rows.copy()
+                                previous_rows.append(row)
+                                step_found = True
+                            else:
+                                if step_found:
+                                    previous_rows.append(row)
+                                    forward_rows = [row]
+                                else:
+                                    if 'prerequisites' in cell_texts:
+                                        forward_rows.append(row)
+                                    elif len(forward_rows) == 2:
+                                        forward_rows.pop(0)
+                                        forward_rows.append(row)
+                                    else:
+                                        forward_rows.append(row)
+
+
+
