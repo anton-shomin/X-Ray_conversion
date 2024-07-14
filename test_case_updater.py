@@ -1,4 +1,5 @@
 import os
+import re
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import parse
 
@@ -39,20 +40,47 @@ def get_labels(dir_path):
 
 
 def remove_header(dir_path):
-    for root, dirs, files in os.walk(dir_path):
-        for file in files:
-            if file.endswith(".xml"):
-                tree = parse(os.path.join(root, file))
-                root_element = tree.getroot()
+    for filename in os.listdir(dir_path):
+        if re.search(r"_\d+.xml$", filename) and not filename.endswith("_0.xml"):
+            tree = ET.parse(os.path.join(dir_path, filename))
+            root = tree.getroot()
 
-                for row in root_element.findall(".//row"):
-                    cell_texts = [cell.text for cell in row.findall(
-                        "cell") if cell.text]
-                    if cell_texts == ['Step #', 'Test Steps', 'Expected Results', 'Comments']:
-                        # Remove this row from its parent
-                        parent = root_element.findall(".")[0]
-                        parent.remove(row)
+            for row in root.findall('row'):
+                cells = row.findall('cell')
+                if len(cells) == 4 and cells[0].text == "Step #" and cells[1].text == "Test Steps" and cells[2].text == "Expected Results" and cells[3].text == "Comments":
+                    root.remove(row)
+
+            tree.write(os.path.join(dir_path, filename))
+
+
+def get_description_tag(dir_path, base_filename):
+    tree = ET.parse(os.path.join(dir_path, base_filename + "_0.xml"))
+    root = tree.getroot()
+    return root.find('description')
 
 
 def add_description(dir_path):
-    pass
+    for base_filename in set(f.rstrip("_0.xml") for f in os.listdir(dir_path) if f.endswith("_0.xml")):
+        description = get_description_tag(dir_path, base_filename)
+
+        for filename in os.listdir(dir_path):
+            if re.search(r"\d+.xml$", filename) and not filename.endswith("_0.xml") and filename.startswith(base_filename):
+                tree = ET.parse(os.path.join(dir_path, filename))
+                root = tree.getroot()
+
+                # remove old description tag if exist
+                old_description = root.find('description')
+                if old_description is not None:
+                    root.remove(old_description)
+
+                # add a new description tag
+                new_description = ET.SubElement(root, 'description')
+                new_description.text = description.text
+
+                tree.write(os.path.join(dir_path, filename))
+
+
+def clear_source(dir_path):
+    for filename in os.listdir(dir_path):
+        if filename.endswith(".xml") and (filename.endswith("_0.xml") or not re.search(r'\d+.xml$', filename)):
+            os.remove(os.path.join(dir_path, filename))
