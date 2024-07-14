@@ -84,3 +84,77 @@ def clear_source(dir_path):
     for filename in os.listdir(dir_path):
         if filename.endswith(".xml") and (filename.endswith("_0.xml") or not re.search(r'\d+.xml$', filename)):
             os.remove(os.path.join(dir_path, filename))
+
+
+def remove_prerequisites(dir_path):
+    for filename in os.listdir(dir_path):
+        if filename.endswith(".xml"):
+            tree = ET.parse(os.path.join(dir_path, filename))
+            root = tree.getroot()
+
+            prerequisites_rows = [row for row in root.findall('row') if row.find('cell').text.lower(
+            ) == "prerequisites" or row.find('cell').text.lower() == "pre-requisites"]
+            for row in prerequisites_rows:
+                root.remove(row)
+
+            tree.write(os.path.join(dir_path, filename))
+
+
+def summary_maker(dir_path):
+    for filename in os.listdir(dir_path):
+        if filename.endswith(".xml"):
+            tree = ET.parse(os.path.join(dir_path, filename))
+            root = tree.getroot()
+
+            for row in root.findall('row'):
+                cells = row.findall('cell')
+                if cells and re.match(r"Case\s+\d+[a-zA-Z]*", cells[0].text):
+                    # Remove the cell
+                    row.remove(cells[0])
+                    # rename row to summary
+                    row.tag = 'summary'
+                if not cells:
+                    # if no cells, change row to summary
+                    row.tag = 'summary'
+
+            tree.write(os.path.join(dir_path, filename))
+
+
+def steps_creator(dir_path):
+    for filename in os.listdir(dir_path):
+        if filename.endswith(".xml"):
+            tree = ET.parse(os.path.join(dir_path, filename))
+            root = tree.getroot()
+
+            description = root.find('description')
+            root.remove(description)
+
+            steps = ET.Element('steps')
+
+            append_to_steps = False
+            for element in list(root):
+                if element.tag == 'summary':
+                    append_to_steps = True
+                    continue
+                if append_to_steps:
+                    steps.append(element)
+                    root.remove(element)
+
+            root.append(steps)
+            root.append(description)
+
+            tree.write(os.path.join(dir_path, filename))
+
+
+def steps_polisher(dir_path):
+    for filename in os.listdir(dir_path):
+        if filename.endswith(".xml"):
+            tree = ET.parse(os.path.join(dir_path, filename))
+            root = tree.getroot()
+
+            for row in root.iter('row'):
+                first_cell = row.find('cell')
+                if first_cell is not None and re.fullmatch(r'\d+', first_cell.text):
+                    row.remove(first_cell)
+
+            tree.write(os.path.join(dir_path, filename))
