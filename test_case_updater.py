@@ -158,3 +158,42 @@ def steps_polisher(dir_path):
                     row.remove(first_cell)
 
             tree.write(os.path.join(dir_path, filename))
+
+
+def steps_formatter(dir_path):
+    for filename in os.listdir(dir_path):
+        if filename.endswith(".xml"):
+            xml_file = os.path.join(dir_path, filename)
+            tree = ET.parse(xml_file)
+            root = tree.getroot()
+
+            for steps in root.findall('steps'):
+                for row in steps.findall('row'):
+                    row.tag = 'step'
+
+            # Save the modified xml
+            tree.write(xml_file)
+
+
+def steps_finalizer(dir_path):
+    for filename in os.listdir(dir_path):
+        if filename.endswith(".xml"):
+            tree = ET.parse(os.path.join(dir_path, filename))
+            root = tree.getroot()
+
+            for step in root.iter('step'):
+                cells = step.findall('cell')
+                for i, cell in enumerate(cells):
+                    if i == 0:
+                        cell.tag = 'action'
+                    elif i == 1:
+                        cell.tag = 'result'
+                    elif i == 2:
+                        cell.tag = 'data'
+
+                # if there's no <data> cell, add an empty one
+                if len(cells) < 3:
+                    ET.SubElement(step, 'data')
+
+            # Save the modified xml
+            tree.write(os.path.join(dir_path, filename))
