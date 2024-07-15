@@ -1,7 +1,4 @@
-import excel_to_xml_converter
-import xml_pretifier
-import test_case_updater
-import xml_to_cases_splitter
+from src import xml_pretifier, excel_to_xml_converter, test_case_updater, xml_to_cases_splitter
 
 # get general label for all test cases in a file
 label = ""

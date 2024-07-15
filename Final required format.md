@@ -57,7 +57,3 @@ copy data to such structure
 `</steps>`
 `</issue>`
 `</issues>`
-
-test case end is empty row
-continue parsing excel file till the next Case X row
-cases from each sheet should be added to tag <worksheet></worksheet>

@@ -1,7 +1,7 @@
 #remove all xml files in the directory and sub-directories
 import os
 
-root_dir = "/Users/antonshomin/Projects/X-RAY challenge/check-tests"
+root_dir = "/check-tests"
 
 def remove_xml_files(dir_path):
     for root, dirs, files in os.walk(dir_path):
