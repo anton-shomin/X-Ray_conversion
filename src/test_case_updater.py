@@ -49,11 +49,14 @@ def description_maker(dir_path):
             tree.write(os.path.join(dir_path, filename))
 
 
-def get_labels(dir_path):
-    pass
-
-
-def add_labels(dir_path):
+def add_labels(dir_path, label):
+    # for all xml files in a specified directory add a new tag <label> with the specified text
+    for filename in os.listdir(dir_path):
+        if filename.endswith(".xml"):
+            tree = ET.parse(os.path.join(dir_path, filename))
+            root = tree.getroot()
+            ET.SubElement(root, 'label').text = label
+            tree.write(os.path.join(dir_path, filename))
     pass
 
 
@@ -125,7 +128,6 @@ def add_description(dir_path):
 
                 tree.write(os.path.join(dir_path, filename))
 
-
 def clear_source(dir_path):
     """
     Clears the source directory by removing all XML files that meet specific criteria.
@@ -141,7 +143,6 @@ def clear_source(dir_path):
     for filename in os.listdir(dir_path):
         if filename.endswith(".xml") and (filename.endswith("_0.xml") or not re.search(r'\d+.xml$', filename)):
             os.remove(os.path.join(dir_path, filename))
-
 
 def remove_prerequisites(dir_path):
     """
@@ -166,7 +167,6 @@ def remove_prerequisites(dir_path):
                 root.remove(row)
 
             tree.write(os.path.join(dir_path, filename))
-
 
 def summary_maker(dir_path):
     """
@@ -193,7 +193,6 @@ def summary_maker(dir_path):
                     row.tag = 'summary'
 
             tree.write(os.path.join(dir_path, filename))
-
 
 def steps_creator(dir_path):
     """
@@ -222,7 +221,6 @@ def steps_creator(dir_path):
             root.append(description)
 
             tree.write(os.path.join(dir_path, filename))
-
 
 def steps_polisher(dir_path):
     """
@@ -257,7 +255,6 @@ def steps_polisher(dir_path):
 
             tree.write(os.path.join(dir_path, filename))
 
-
 def steps_formatter(dir_path):
     """
     A function that formats the steps in an XML file by changing the tag from 'row' to 'step'.
@@ -280,7 +277,6 @@ def steps_formatter(dir_path):
 
             # Save the modified xml
             tree.write(xml_file)
-
 
 def steps_finalizer(dir_path):
     """
@@ -316,8 +312,7 @@ def steps_finalizer(dir_path):
             # Save the modified xml
             tree.write(os.path.join(dir_path, filename))
 
-
-def tc_maker(dir_path):
+def tc_maker(dir_path, label):
     description_maker(dir_path)
     remove_header(dir_path)
     add_description(dir_path)
@@ -327,4 +322,5 @@ def tc_maker(dir_path):
     steps_creator(dir_path)
     steps_polisher(dir_path)
     steps_formatter(dir_path)
+    add_labels(dir_path,label)
     steps_finalizer(dir_path)
