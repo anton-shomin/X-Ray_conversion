@@ -50,7 +50,16 @@ def description_maker(dir_path):
 
 
 def add_labels(dir_path, label):
-    # for all xml files in a specified directory add a new tag <label> with the specified text
+    """
+    A function that adds a new tag <label> with the specified text to all XML files in the specified directory.
+
+    Args:
+        dir_path (str): The path to the directory containing the XML files.
+        label (str): The specified text to be added as the content of the <label> tag.
+
+    Returns:
+        None
+    """
     for filename in os.listdir(dir_path):
         if filename.endswith(".xml"):
             tree = ET.parse(os.path.join(dir_path, filename))
