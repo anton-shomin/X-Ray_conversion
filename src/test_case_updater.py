@@ -1,24 +1,6 @@
 import os
 import re
 import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import parse
-
-# Obsolete method for now
-# def test_case_tag_creator(dir_path, old_tag, new_tag):
-#     for root, dirs, files in os.walk(dir_path):
-#         for file in files:
-#             if file.endswith(".xml"):
-#                 file_path = os.path.join(root, file)
-#                 tree = ET.parse(file_path)
-#                 root = tree.getroot()
-
-#                 new_element = ET.Element(new_tag)
-
-#                 for old_element in root.iter(old_tag):
-#                     if old_element.attrib.get('name').lower() != "test case info":
-#                         old_element.append(new_element)
-
-#                 tree.write(file_path)
 
 
 def description_maker(dir_path):
@@ -48,14 +30,13 @@ def description_maker(dir_path):
             c.text for c in row.findall('cell'))
       tree.write(os.path.join(dir_path, filename))
 
-
-def add_labels(dir_path, label):
+def add_labels(dir_path, labels):
   """
   A function that adds a new tag <label> with the specified text to all XML files in the specified directory.
 
   Args:
       dir_path (str): The path to the directory containing the XML files.
-      label (str): The specified text to be added as the content of the <label> tag.
+      labels (list): A list of labels to be added as the content of the <label> tags.
 
   Returns:
       None
@@ -64,10 +45,12 @@ def add_labels(dir_path, label):
     if filename.endswith(".xml"):
       tree = ET.parse(os.path.join(dir_path, filename))
       root = tree.getroot()
-      ET.SubElement(root, 'label').text = label
-      tree.write(os.path.join(dir_path, filename))
-  pass
 
+      # Add a new <label> tag for each label in the list
+      for label in labels:
+        ET.SubElement(root, 'label').text = label
+
+      tree.write(os.path.join(dir_path, filename))
 
 def remove_header(dir_path):
   """
@@ -91,7 +74,6 @@ def remove_header(dir_path):
 
       tree.write(os.path.join(dir_path, filename))
 
-
 def get_description_tag(dir_path, base_filename):
   """
   Retrieves the 'description' tag from the XML file located in the specified directory.
@@ -106,7 +88,6 @@ def get_description_tag(dir_path, base_filename):
   tree = ET.parse(os.path.join(dir_path, base_filename + "_0.xml"))
   root = tree.getroot()
   return root.find('description')
-
 
 def add_description(dir_path):
   """

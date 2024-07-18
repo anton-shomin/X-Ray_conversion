@@ -2,6 +2,8 @@
 
 import os
 import xml.etree.ElementTree as ET
+from typing import re
+
 
 # remove cells with text "None" in it
 
@@ -87,7 +89,7 @@ def clear_test_case_info_sheet(dir_path):
   These rows are removed from the worksheet.
   The text of the cell next to the last found "Test ID" cell is returned.
   """
-  label = ""
+  label = []
   for root, dirs, files in os.walk(dir_path):
     for file in files:
       if not file.endswith(".xml"):
@@ -114,7 +116,9 @@ def clear_test_case_info_sheet(dir_path):
                 keep_row = True
                 if i+1 < len(cells):  # Ensure next cell exists
                   # Get text of cell next to test id
-                  label = cells[i+1].text
+                  labels_text = cells[i + 1].text
+                  labels_list = re.split(",|\n", labels_text)
+                  label.extend([label.strip() for label in labels_list])
                 break
               elif "test case purpose" in cell_text:
                 keep_row = True
