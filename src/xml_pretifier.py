@@ -2,7 +2,7 @@
 
 import os
 import xml.etree.ElementTree as ET
-from typing import re
+import re
 
 
 # remove cells with text "None" in it
