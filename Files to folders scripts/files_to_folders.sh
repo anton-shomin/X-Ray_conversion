@@ -8,8 +8,8 @@ cd "$dir_path"
 
 # loop through all files in the directory
 for file in *; do
-    # skip directories
-    if [[ -d $file ]]; then continue; fi
+    # skip directories and "files_to_folder" file
+    if [[ -d $file ]] || [[ $file == "files_to_folder" ]]; then continue; fi
 
     # get file name without extension
     filename="${file%.*}"

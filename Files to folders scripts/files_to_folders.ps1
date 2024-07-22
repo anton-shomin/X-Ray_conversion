@@ -8,6 +8,9 @@ $items = Get-ChildItem -Path $dirPath -File
 
 # Loop through each item in the directory
 foreach($item in $items) {
+    # Skip "files_to_folder" file
+    if ($item.Name -eq "files_to_folder") { continue }
+
     # Get file name without extension
     $filename = [IO.Path]::GetFileNameWithoutExtension($item.Name)
 
