@@ -194,7 +194,8 @@ def steps_creator(dir_path):
       root = tree.getroot()
 
       description = root.find('description')
-      root.remove(description)
+      if description is not None:
+        root.remove(description)
 
       steps = ET.Element('steps')
 
@@ -208,7 +209,8 @@ def steps_creator(dir_path):
           root.remove(element)
 
       root.append(steps)
-      root.append(description)
+      if description is not None:
+        root.append(description)
 
       tree.write(os.path.join(dir_path, filename))
 
