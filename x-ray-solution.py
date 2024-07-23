@@ -1,9 +1,8 @@
 import glob
 import os
 import json
-from src import xml_pretifier, excel_to_xml_converter, test_case_updater, xml_to_cases_splitter
-import xml_to_csv_converter
-import argparse
+from src import xml_pretifier, excel_to_xml_converter, test_case_updater, xml_to_cases_splitter, xml_to_csv_converter
+
 
 def remove_files_in_directory(dir_path, extension):
     """
@@ -22,6 +21,15 @@ def remove_files_in_directory(dir_path, extension):
         os.remove(file)
 
 def get_path_data_from_json(json_file_path):
+    """
+    Retrieves the 'path' and 'repository_path' values from a JSON file.
+
+    Args:
+        json_file_path (str): The path to the JSON file.
+
+    Returns:
+        tuple: A tuple containing the 'path' and 'repository_path' values.
+    """
     with open(json_file_path, 'r') as json_file:
         data = json.load(json_file)
     return data['path'], data['repository_path']
