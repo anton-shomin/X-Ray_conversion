@@ -4,6 +4,9 @@ import xml.etree.ElementTree as ET
 import re
 
 
+def filter_labels(labels):
+  return [l for l in labels if not re.match(r"(?i)test[-_ ]case", l)]
+
 def xml_to_csv(dir_path, repository_path):
   """
   Converts XML files in the specified directory to a CSV file.
@@ -35,10 +38,11 @@ def xml_to_csv(dir_path, repository_path):
           description = description_element.text if description_element is not None else ""
 
           label_elements = root.findall('.//label')
-          file_label = os.path.splitext(filename)[0]  # Remove extension
-          file_label = re.sub(r'_\d+$', '', file_label)  # Remove _number at the end
+          file_label = os.path.splitext(filename)[0]
+          file_label = re.sub(r'_\d+$', '', file_label)
           xml_labels = [elem.text for elem in label_elements if elem.text is not None]
           labels = [file_label] + xml_labels
+          labels = filter_labels(labels)  # Apply the function
           labels = labels[:3] + [""] * (3 - len(labels))  # Ensure 3 labels
 
           steps = root.findall('.//step')

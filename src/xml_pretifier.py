@@ -117,7 +117,7 @@ def clear_test_case_info_sheet(dir_path):
                 if i+1 < len(cells):  # Ensure next cell exists
                   # Get text of cell next to test id
                   labels_text = cells[i + 1].text
-                  labels_list = re.split(",|\n", labels_text)
+                  labels_list = re.split(",|\n|\s", labels_text)
                   label.extend([label.strip() for label in labels_list])
                 break
               elif "test case purpose" in cell_text:
